@@ -1,25 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
-
+import Navbar from "./components/Navbar";
+import ChartPage from "./pages/Chart";
+import { BrowserRouter as Router,Routes,Route } from "react-router-dom";
+import LiveData from "./pages/LiveData";
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+return(
+  <>
+  <Router>
+  <Navbar/>
+<div className="pt-[4rem]">
+   <Routes>
+      <Route element={ <LiveData/> } path="/" />
+      <Route element={ <ChartPage/> } path="/chart" />
+    </Routes>
+</div>
+   
+  </Router>
+   
+  </> 
+)
 }
 
 export default App;
