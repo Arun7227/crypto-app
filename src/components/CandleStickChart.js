@@ -30,6 +30,14 @@
 
     const handleWebSocketMessages = useCallback((event) => {
       const message = JSON.parse(event.data);
+
+        if (message.ping) {
+          if (ws.current) {
+            ws.current.send(JSON.stringify({ pong: message.ping }));
+          }
+          return;
+        }
+
       if (message.k) {
         const kline = message.k;
         const newCandle = {
@@ -56,7 +64,7 @@
     useEffect(() => {
       fetchInitialData();
 
-      ws.current = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}@+05:30`);
+      ws.current = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`);
       ws.current.onmessage = handleWebSocketMessages;
 
       return () => {

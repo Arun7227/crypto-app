@@ -25,6 +25,12 @@ function LiveData() {
       setData(prevData => {
         const updatedData = [...prevData];
         messages.forEach(message => {
+            if (message.ping) {
+                if (ws.current) {
+                  ws.current.send(JSON.stringify({ pong: message.ping }));
+                }
+                return;
+              }
           if (message.s.endsWith('USDT')) {
             const index = updatedData.findIndex(item => item.symbol === message.s);
             if (index >= 0) {
