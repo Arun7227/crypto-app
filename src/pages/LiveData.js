@@ -4,9 +4,15 @@ import Pagination from '../components/Pagination';
 
 function LiveData() {
   const [data, setData] = useState([]);
+  const [searchTerm,setSearchterm]=useState('')
+  const [filter,setFilter]=useState([])
   const ws = useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(15); 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  let currentItems=data.slice(indexOfFirstItem, indexOfLastItem);
+  let totalPages =searchTerm.length && filter.length>0 ? Math.ceil(filter.length / itemsPerPage): Math.ceil(data.length / itemsPerPage)
   const fetchInitialData = useCallback(async () => {
     try {
       const response = await axios.get('https://api.binance.com/api/v3/ticker/24hr');
@@ -59,39 +65,74 @@ function LiveData() {
   }, [fetchInitialData, handleWebSocketMessages]);
 
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  useEffect(()=>{
+    debugger
+    currentItems && currentItems.length && setFilter(
+        currentItems.filter(value=>{
+        return value.symbol.toLowerCase().startsWith(searchTerm.toLowerCase()) || value.symbol.toLowerCase().endsWith(searchTerm.toLowerCase())
+      }))
+   console.log(searchTerm);
+  },[searchTerm,currentItems])
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
+
+  
+
   return (
     <div className='mt-5 w-full flex justify-center'>
  <div className='w-[90%]'>
+    <div className='mb-3 w-[20%]'>
+    <input
+          type="search"
+          value={searchTerm}
+          onChange={(e)=>setSearchterm(e.target.value)}
+          className="w-full border border-gray-300 rounded-md shadow-sm py-2 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-8"
+          placeholder="Search symbols..."
+        />
+    </div>
       <table className='text-center w-full  shadow-xl border-collapse'>
         <thead  className=' bg-blue-500 text-white'>
           <tr>
             <th className='font-semibold p-3'>Symbol</th>
-            <th className='font-semibold p-3'>Last</th>
+            <th className='font-semibold p-3'>Open</th>
+            <th className='font-semibold p-3'>High</th>
+            <th className='font-semibold p-3'>Low</th>
+            <th className='font-semibold p-3'>Close</th>
             <th className='font-semibold p-3'>Change</th>
             <th className='font-semibold p-3'>Change%</th>
             <th className='font-semibold p-3'>Volume</th>
           </tr>
         </thead>
         <tbody>
-          {currentItems.map((item,index) => (
+          {searchTerm.length && filter.length>0 ? 
+          (filter.map((item,index) => (
             <tr key={item.symbol} className='p-4 border border-gray-100 border-solid cursor-pointer hover:bg-gray-200'>
               <td className='p-2 font-semibold text-blue-500' >{item.symbol}</td>
-              <td className='p-2 text-blue-500' >{item.lastPrice}</td>
+              <td className='p-2 text-blue-500' >{item.openPrice}</td>
+              <td className='p-2 text-blue-500' >{item.highPrice}</td>
+              <td className='p-2 text-blue-500' >{item.lowPrice}</td>
+              <td className='p-2 text-blue-500' >{item.prevClosePrice}</td>
+              <td className={`p-2 font-semibold ${item.priceChange>=0?'text-green-500':'text-red-500' }`} >{item.priceChange}</td>
+              <td className={`p-2 font-semibold ${item.priceChangePercent>=0?'text-green-500':'text-red-500' }`} >{item.priceChangePercent}%</td>
+              <td className='p-2 text-blue-500'>{item.volume}</td>
+            </tr>)))
+          :(currentItems.map((item,index) => (
+            <tr key={item.symbol} className='p-4 border border-gray-100 border-solid cursor-pointer hover:bg-gray-200'>
+              <td className='p-2 font-semibold text-blue-500' >{item.symbol}</td>
+              <td className='p-2 text-blue-500' >{item.openPrice}</td>
+              <td className='p-2 text-blue-500' >{item.highPrice}</td>
+              <td className='p-2 text-blue-500' >{item.lowPrice}</td>
+              <td className='p-2 text-blue-500' >{item.prevClosePrice}</td>
               <td className={`p-2 font-semibold ${item.priceChange>=0?'text-green-500':'text-red-500' }`} >{item.priceChange}</td>
               <td className={`p-2 font-semibold ${item.priceChangePercent>=0?'text-green-500':'text-red-500' }`} >{item.priceChangePercent}%</td>
               <td className='p-2 text-blue-500'>{item.volume}</td>
             </tr>
-          ))}
+          )))}
         </tbody>
       </table>
       <div className='flex justify-end'>
