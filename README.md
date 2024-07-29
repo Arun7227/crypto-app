@@ -1,3 +1,5 @@
+binance endpoint: wss://stream.binance.com:9443
+candlestic: wss://stream.binance.com:9443/btcusdt@kline_<interval>
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
